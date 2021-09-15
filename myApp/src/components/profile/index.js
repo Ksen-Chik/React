@@ -1,24 +1,17 @@
 import React from "react";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { store } from "../store/index";
 import { toggleCheckBox } from "../store/profile/actions";
+import { useSelector, useDispatch } from 'react-redux';
 
 
 export const Profile = () => {
 
-  const [dummy, setDummy] = useState();
-
-  console.log(JSON.stringify(store.getState()));
-
-  //const { checkbox, name } = store.getState().profile;
-
-  const profile = store.getState().profile;
-  const dispatch = store.dispatch;
+  const { profile } = useSelector((state) => state);
+  const dispatch = useDispatch();
 
   const setCheckbox = useCallback(() => {
     dispatch(toggleCheckBox);
-    console.log(JSON.stringify(profile));
-    setDummy({});
   }, [dispatch]);
 
   return (
