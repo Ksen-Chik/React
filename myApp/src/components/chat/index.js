@@ -1,17 +1,27 @@
 import TextField from "@material-ui/core/TextField";
 import { createTheme, makeStyles, ThemeProvider } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import "./index.css";
 import Chats from "../chats";
 import SendIcon from '@material-ui/icons/Send';
 import purple from '@material-ui/core/colors/purple';
 import green from '@material-ui/core/colors/green';
+import { useSelector, useDispatch, shallowEqual } from 'react-redux';
+import { getChats } from "../store/chats/selectors";
+import { addMessage } from "../store/messages/actions";
+import { getMessages } from "../store/messages/selectors";
 
 const imgUrl =
     "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/";
 
 function Chat(props) {
+
+    const { chats } = useSelector(getChats, shallowEqual);
+    const { messages } = useSelector(getMessages, shallowEqual);
+
+    const dispatch = useDispatch();
+
     const theme = createTheme({
         palette: {
             primary: {
@@ -25,42 +35,60 @@ function Chat(props) {
 
     const inputRef = useRef(null);
 
-    const [messages, setMessages] = useState([]);
+    const [currentMessages, setCurrentMessages] = useState([]);
 
-    const [chatID, setChatID] = useState();
+    const [chatID, setChatID] = useState(0);
     const [messageAuthor, setMessageAuthor] = useState("");
     const [messageText, setMessageText] = useState("");
-    const [messageId, setMessageId] = useState(0);
 
-    const [chats, setChats] = useState([{ id: 1, user: 'Ivan', messages: [] }, { id: 2, user: 'Alex', messages: [] }]);
+    const putMessageToStore = useCallback(
+        (chatID, newMessage) => {
+            dispatch(addMessage(chatID, newMessage));
+        },
+        [dispatch]
+    );
 
-    if (props.match.params.chatId && props.match.params.chatId !== chatID) {
+    if (props.match.params.chatId && +props.match.params.chatId !== chatID) {
         let currentChat = chats.find(ch => ch.id === +props.match.params.chatId);
 
         setMessageAuthor(currentChat.user);
 
-        setMessages(currentChat.messages);
+        setChatID(+props.match.params.chatId);
 
-        setChatID(props.match.params.chatId);
+        console.log(`props.chatId ${+props.match.params.chatId}`);
+        console.log(`chatID ${chatID}`);
+        console.log("messages");
+        console.log(messages);
+
+        let foundMessages = messages.filter(m => m.chatId === +props.match.params.chatId);
+        if (!foundMessages) {
+            foundMessages = [];
+        }
+
+        console.log("foundMessages");
+        console.log(foundMessages);
+
+        setCurrentMessages(foundMessages);
     }
 
     const sendMessage = (msgAuthor, msgText) => {
         if (msgAuthor === "" && msgText === "") {
             return;
         }
-        setMessageId(messageId + 1);
-        setMessages([...messages, { author: msgAuthor, text: msgText, id: messageId }]);
 
-        let currentChat = chats.find(ch => ch.id === +props.match.params.chatId);
+        let newMessage = { author: msgAuthor, text: msgText };
 
-        currentChat.messages = messages;
+        setCurrentMessages([...currentMessages, newMessage]);
+
+        putMessageToStore(chatID, newMessage);
+
         inputRef.current.focus();
     }
 
     useEffect(() => {
         inputRef.current.focus();
         const timeout = setTimeout(() => {
-            let lastMessage = messages[messages.length - 1];
+            let lastMessage = currentMessages[currentMessages.length - 1];
             if (lastMessage !== undefined && lastMessage.author !== "Robot") {
                 sendMessage("Robot", `${lastMessage.author}, ваш звонок очень важен для вас`);
                 clearTimeout(timeout);
@@ -84,8 +112,8 @@ function Chat(props) {
                     <Chats chats={chats} />
 
                     <div className="messages">
-                        {messages.map((message) =>
-                            <div key={message.id}>
+                        {currentMessages.map((message, index) =>
+                            <div key={index}>
                                 <div>{message.author} - {message.text}</div>
                             </div>)}
 
