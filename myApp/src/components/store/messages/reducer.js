@@ -1,4 +1,4 @@
-import { ADD_MESSAGE, DELETE_MESSAGE } from "./actions";
+import { ADD_MESSAGE, DELETE_MESSAGE, CLEAR_CHAT } from "./actions";
 
 const initialState = {
     messages: [],
@@ -31,6 +31,12 @@ export const messagesReducer = (state = initialState, { type, payload }) => {
                     ...state.messages,
                     newChatMessages,
                 },
+            };
+        }
+        case CLEAR_CHAT: {
+            return {
+                ...state,
+                messages: state.messages.filter(m => m.chatId !== payload.chatId),
             };
         }
 

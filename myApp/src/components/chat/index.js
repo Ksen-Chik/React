@@ -6,7 +6,7 @@ import Chats from "../chats";
 import SendIcon from '@material-ui/icons/Send';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { getChats } from "../store/chats/selectors";
-import { addMessage } from "../store/messages/actions";
+import { addMessage, clearChat } from "../store/messages/actions";
 import { getMessages } from "../store/messages/selectors";
 import { makeStyles } from '@material-ui/core/styles';
 import { addChat, deleteChat } from "../store/chats/actions";
@@ -75,6 +75,16 @@ function Chat(props) {
 
     const classes = useStyles();
 
+    const addChatHandler = (user) => {
+        dispatch(addChat(user));
+    };
+
+    const deleteChatHandler = (id) => {
+        dispatch(clearChat(id));
+        dispatch(deleteChat(id));
+        history.push("/chats");
+    };
+
     const form = chatID ? (
         <form>
             <label>Сообщение: </label>
@@ -104,8 +114,8 @@ function Chat(props) {
 
                 <Chats
                     chats={chats}
-                    addChat={(user) => dispatch(addChat(user))}
-                    deleteChat={(id) => dispatch(deleteChat(id))} />
+                    addChat={addChatHandler}
+                    deleteChat={deleteChatHandler} />
 
                 <div className="messages">
                     {currentMessages.map((message, index) =>
