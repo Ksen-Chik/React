@@ -1,7 +1,7 @@
 import { ADD_MESSAGE, DELETE_MESSAGE } from "./actions";
 
 const initialState = {
-    messages: [{ author: 'Ivan', text: 'Initial message sample', id: 0, chatId: 1 }],
+    messages: [],
 };
 
 export const messagesReducer = (state = initialState, { type, payload }) => {

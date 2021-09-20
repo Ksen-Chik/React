@@ -1,7 +1,7 @@
 import TextField from "@material-ui/core/TextField";
 import { createTheme, makeStyles, ThemeProvider } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
 import "./index.css";
 import Chats from "../chats";
 import SendIcon from '@material-ui/icons/Send';
@@ -35,18 +35,22 @@ function Chat(props) {
 
     const inputRef = useRef(null);
 
-    const [currentMessages, setCurrentMessages] = useState([]);
-
     const [chatID, setChatID] = useState(0);
     const [messageAuthor, setMessageAuthor] = useState("");
-    const [messageText, setMessageText] = useState("");
 
-    const putMessageToStore = useCallback(
-        (chatID, newMessage) => {
-            dispatch(addMessage(chatID, newMessage));
-        },
-        [dispatch]
-    );
+    const currentMessages = messages.filter(m => m.chatId === +props.match.params.chatId) ?? [];
+
+    const putMessageToStoreWithThunk = (chatId, message) => (dispatch, getState) => {
+        dispatch(addMessage(chatId, message));
+        if (message.author !== "Robot") {
+            const botMessage = { author: "Robot", text: "ваш звонок очень важен для вас" };
+            setTimeout(() => dispatch(addMessage(chatId, botMessage)), 2000);
+        }
+    }
+
+    if (!props.match.params.chatId && chatID) {
+        setChatID(props.match.params.chatId);
+    }
 
     if (props.match.params.chatId && +props.match.params.chatId !== chatID) {
         let currentChat = chats.find(ch => ch.id === +props.match.params.chatId);
@@ -54,21 +58,6 @@ function Chat(props) {
         setMessageAuthor(currentChat.user);
 
         setChatID(+props.match.params.chatId);
-
-        console.log(`props.chatId ${+props.match.params.chatId}`);
-        console.log(`chatID ${chatID}`);
-        console.log("messages");
-        console.log(messages);
-
-        let foundMessages = messages.filter(m => m.chatId === +props.match.params.chatId);
-        if (!foundMessages) {
-            foundMessages = [];
-        }
-
-        console.log("foundMessages");
-        console.log(foundMessages);
-
-        setCurrentMessages(foundMessages);
     }
 
     const sendMessage = (msgAuthor, msgText) => {
@@ -78,30 +67,43 @@ function Chat(props) {
 
         let newMessage = { author: msgAuthor, text: msgText };
 
-        setCurrentMessages([...currentMessages, newMessage]);
-
-        putMessageToStore(chatID, newMessage);
+        dispatch(putMessageToStoreWithThunk(chatID, newMessage));
 
         inputRef.current.focus();
     }
-
-    useEffect(() => {
-        inputRef.current.focus();
-        const timeout = setTimeout(() => {
-            let lastMessage = currentMessages[currentMessages.length - 1];
-            if (lastMessage !== undefined && lastMessage.author !== "Robot") {
-                sendMessage("Robot", `${lastMessage.author}, ваш звонок очень важен для вас`);
-                clearTimeout(timeout);
-            }
-        }, 2000);
-    });
 
     const useStyles = makeStyles((theme) => ({
         button: {
             margin: theme.spacing(1),
         },
     }));
+
     const classes = useStyles();
+
+    const form = chatID ? (
+        <form>
+            <label>Сообщение: </label>
+            <TextField
+                placeholder="message"
+                label="Label"
+                //value={messageText}
+                //onChange={(event) => { setMessageText(event.target.value) }}
+                inputRef={inputRef}
+            />
+
+            <Button onClick={() => {
+                sendMessage(messageAuthor, inputRef.current.value);
+                inputRef.current.value = "";
+            }}
+                variant="contained"
+                color="primary"
+                className={classes.button}
+                endIcon={<SendIcon />}
+            >
+                SEND
+            </Button>
+        </form>) : "";
+
     return (
         <div className="chat">
             <ThemeProvider theme={theme}>
@@ -116,29 +118,7 @@ function Chat(props) {
                             <div key={index}>
                                 <div>{message.author} - {message.text}</div>
                             </div>)}
-
-                        <form>
-                            <label>Сообщение: </label>
-                            <TextField
-                                placeholder="message"
-                                label="Label"
-                                value={messageText}
-                                onChange={(event) => { setMessageText(event.target.value) }}
-                                inputRef={inputRef}
-                            />
-
-                            <Button onClick={() => {
-                                sendMessage(messageAuthor, messageText);
-                                setMessageText("");
-                            }}
-                                variant="contained"
-                                color="primary"
-                                className={classes.button}
-                                endIcon={<SendIcon />}
-                            >
-                                SEND
-                            </Button>
-                        </form>
+                        {form}
                     </div>
                 </div>
             </ThemeProvider>
