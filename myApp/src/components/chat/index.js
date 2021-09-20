@@ -1,16 +1,15 @@
 import TextField from "@material-ui/core/TextField";
-import { createTheme, makeStyles, ThemeProvider } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import { useState, useRef } from "react";
 import "./index.css";
 import Chats from "../chats";
 import SendIcon from '@material-ui/icons/Send';
-import purple from '@material-ui/core/colors/purple';
-import green from '@material-ui/core/colors/green';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { getChats } from "../store/chats/selectors";
 import { addMessage } from "../store/messages/actions";
 import { getMessages } from "../store/messages/selectors";
+import { makeStyles } from '@material-ui/core/styles';
+import { addChat, deleteChat } from "../store/chats/actions";
 
 const imgUrl =
     "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/";
@@ -21,17 +20,6 @@ function Chat(props) {
     const { messages } = useSelector(getMessages, shallowEqual);
 
     const dispatch = useDispatch();
-
-    const theme = createTheme({
-        palette: {
-            primary: {
-                main: purple[500],
-            },
-            secondary: {
-                main: green[500],
-            },
-        },
-    });
 
     const inputRef = useRef(null);
 
@@ -53,6 +41,9 @@ function Chat(props) {
     }
 
     if (props.match.params.chatId && +props.match.params.chatId !== chatID) {
+
+        console.log(chats);
+
         let currentChat = chats.find(ch => ch.id === +props.match.params.chatId);
 
         setMessageAuthor(currentChat.user);
@@ -61,7 +52,7 @@ function Chat(props) {
     }
 
     const sendMessage = (msgAuthor, msgText) => {
-        if (msgAuthor === "" && msgText === "") {
+        if (msgAuthor === "" || msgText === "") {
             return;
         }
 
@@ -70,6 +61,10 @@ function Chat(props) {
         dispatch(putMessageToStoreWithThunk(chatID, newMessage));
 
         inputRef.current.focus();
+    }
+
+    const addChatHandler = (user) => {
+        ;
     }
 
     const useStyles = makeStyles((theme) => ({
@@ -85,9 +80,6 @@ function Chat(props) {
             <label>Сообщение: </label>
             <TextField
                 placeholder="message"
-                label="Label"
-                //value={messageText}
-                //onChange={(event) => { setMessageText(event.target.value) }}
                 inputRef={inputRef}
             />
 
@@ -106,22 +98,23 @@ function Chat(props) {
 
     return (
         <div className="chat">
-            <ThemeProvider theme={theme}>
-                <img src={imgUrl + "1280px-React-icon.svg.png"} />
+            <img src={imgUrl + "1280px-React-icon.svg.png"} />
 
-                <div className="content">
+            <div className="content">
 
-                    <Chats chats={chats} />
+                <Chats
+                    chats={chats}
+                    addChat={(user) => dispatch(addChat(user))}
+                    deleteChat={(id) => dispatch(deleteChat(id))} />
 
-                    <div className="messages">
-                        {currentMessages.map((message, index) =>
-                            <div key={index}>
-                                <div>{message.author} - {message.text}</div>
-                            </div>)}
-                        {form}
-                    </div>
+                <div className="messages">
+                    {currentMessages.map((message, index) =>
+                        <div key={index}>
+                            <div>{message.author} - {message.text}</div>
+                        </div>)}
+                    {form}
                 </div>
-            </ThemeProvider>
+            </div>
         </div >
     );
 }

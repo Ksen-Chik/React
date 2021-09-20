@@ -1,0 +1,11 @@
+.new-chat-name {
+    max-width: 100px;    
+}
+.new-chat-creator {
+    display: flex;
+    flex-direction: row;
+    margin-left: 50px;
+}
+.chat-create-button {
+    margin-left: 10px;
+}
