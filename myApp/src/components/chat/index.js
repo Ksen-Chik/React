@@ -10,6 +10,7 @@ import { addMessage } from "../store/messages/actions";
 import { getMessages } from "../store/messages/selectors";
 import { makeStyles } from '@material-ui/core/styles';
 import { addChat, deleteChat } from "../store/chats/actions";
+import { useHistory } from "react-router-dom";
 
 const imgUrl =
     "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/";
@@ -28,6 +29,8 @@ function Chat(props) {
 
     const currentMessages = messages.filter(m => m.chatId === +props.match.params.chatId) ?? [];
 
+    const history = useHistory();
+
     const putMessageToStoreWithThunk = (chatId, message) => (dispatch, getState) => {
         dispatch(addMessage(chatId, message));
         if (message.author !== "Robot") {
@@ -42,13 +45,14 @@ function Chat(props) {
 
     if (props.match.params.chatId && +props.match.params.chatId !== chatID) {
 
-        console.log(chats);
-
         let currentChat = chats.find(ch => ch.id === +props.match.params.chatId);
 
-        setMessageAuthor(currentChat.user);
-
-        setChatID(+props.match.params.chatId);
+        if (!currentChat) {
+            history.push("/chats");
+        } else {
+            setMessageAuthor(currentChat.user);
+            setChatID(+props.match.params.chatId);
+        }
     }
 
     const sendMessage = (msgAuthor, msgText) => {
@@ -61,10 +65,6 @@ function Chat(props) {
         dispatch(putMessageToStoreWithThunk(chatID, newMessage));
 
         inputRef.current.focus();
-    }
-
-    const addChatHandler = (user) => {
-        ;
     }
 
     const useStyles = makeStyles((theme) => ({
