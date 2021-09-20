@@ -1,19 +1,13 @@
-import TextField from "@material-ui/core/TextField";
-import Button from '@material-ui/core/Button';
-import { useState, useRef } from "react";
+import { useState } from "react";
 import "./index.css";
 import Chats from "../chats";
-import SendIcon from '@material-ui/icons/Send';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { getChats } from "../store/chats/selectors";
 import { addMessage, clearChat } from "../store/messages/actions";
 import { getMessages } from "../store/messages/selectors";
-import { makeStyles } from '@material-ui/core/styles';
 import { addChat, deleteChat } from "../store/chats/actions";
 import { useHistory } from "react-router-dom";
-
-const imgUrl =
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/";
+import MessageList from "../messageList";
 
 function Chat(props) {
 
@@ -22,10 +16,10 @@ function Chat(props) {
 
     const dispatch = useDispatch();
 
-    const inputRef = useRef(null);
-
     const [chatID, setChatID] = useState(0);
     const [messageAuthor, setMessageAuthor] = useState("");
+
+    const imgUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/";
 
     const currentMessages = messages.filter(m => m.chatId === +props.match.params.chatId) ?? [];
 
@@ -63,17 +57,7 @@ function Chat(props) {
         let newMessage = { author: msgAuthor, text: msgText };
 
         dispatch(putMessageToStoreWithThunk(chatID, newMessage));
-
-        inputRef.current.focus();
     }
-
-    const useStyles = makeStyles((theme) => ({
-        button: {
-            margin: theme.spacing(1),
-        },
-    }));
-
-    const classes = useStyles();
 
     const addChatHandler = (user) => {
         dispatch(addChat(user));
@@ -85,30 +69,9 @@ function Chat(props) {
         history.push("/chats");
     };
 
-    const form = chatID ? (
-        <form>
-            <label>Сообщение: </label>
-            <TextField
-                placeholder="message"
-                inputRef={inputRef}
-            />
-
-            <Button onClick={() => {
-                sendMessage(messageAuthor, inputRef.current.value);
-                inputRef.current.value = "";
-            }}
-                variant="contained"
-                color="primary"
-                className={classes.button}
-                endIcon={<SendIcon />}
-            >
-                SEND
-            </Button>
-        </form>) : "";
-
     return (
         <div className="chat">
-            <img src={imgUrl + "1280px-React-icon.svg.png"} />
+            <img src={imgUrl + "1280px-React-icon.svg.png"} alt="logo" />
 
             <div className="content">
 
@@ -117,13 +80,12 @@ function Chat(props) {
                     addChat={addChatHandler}
                     deleteChat={deleteChatHandler} />
 
-                <div className="messages">
-                    {currentMessages.map((message, index) =>
-                        <div key={index}>
-                            <div>{message.author} - {message.text}</div>
-                        </div>)}
-                    {form}
-                </div>
+                <MessageList
+                    showSendForm={chatID}
+                    messages={currentMessages}
+                    messageAuthor={messageAuthor}
+                    sendMessage={sendMessage}
+                />
             </div>
         </div >
     );

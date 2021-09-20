@@ -3,7 +3,7 @@ import "./App.css";
 import { Provider } from "react-redux";
 import { store, persistor } from "./components/store";
 import { PersistGate, } from 'redux-persist/integration/react';
-import { createTheme, makeStyles, ThemeProvider } from '@material-ui/core/styles';
+import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 import purple from '@material-ui/core/colors/purple';
 import green from '@material-ui/core/colors/green';
 
@@ -19,12 +19,6 @@ function App() {
       },
     },
   });
-
-  const useStyles = makeStyles((theme) => ({
-    button: {
-      margin: theme.spacing(1),
-    },
-  }));
 
   return (
     <Provider store={store}>
