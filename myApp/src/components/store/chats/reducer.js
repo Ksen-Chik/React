@@ -12,7 +12,7 @@ export const chatsReducer = (state = initialState, { type, payload }) => {
                 chats: [
                     ...state.chats,
                     {
-                        id: state.chats.length + 1,
+                        id: `chat-${Date.now()}`,
                         user: payload,
                     },
                 ],

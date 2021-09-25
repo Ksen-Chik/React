@@ -3,7 +3,7 @@ import "./index.css";
 import Chats from "../chats";
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { getChats } from "../store/chats/selectors";
-import { addMessage, clearChat } from "../store/messages/actions";
+import { putMessageToStoreWithThunk, clearChat } from "../store/messages/actions";
 import { getMessages } from "../store/messages/selectors";
 import { addChat, deleteChat } from "../store/chats/actions";
 import { useHistory } from "react-router-dom";
@@ -24,14 +24,6 @@ function Chat(props) {
     const currentMessages = messages.filter(m => m.chatId === +props.match.params.chatId) ?? [];
 
     const history = useHistory();
-
-    const putMessageToStoreWithThunk = (chatId, message) => (dispatch, getState) => {
-        dispatch(addMessage(chatId, message));
-        if (message.author !== "Robot") {
-            const botMessage = { author: "Robot", text: "ваш звонок очень важен для вас" };
-            setTimeout(() => dispatch(addMessage(chatId, botMessage)), 2000);
-        }
-    }
 
     if (!props.match.params.chatId && chatID) {
         setChatID(props.match.params.chatId);

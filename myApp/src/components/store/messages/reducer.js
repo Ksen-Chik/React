@@ -15,7 +15,7 @@ export const messagesReducer = (state = initialState, { type, payload }) => {
                         author: payload.message.author,
                         text: payload.message.text,
                         chatId: payload.chatId,
-                        id: state.messages.length,
+                        id: `message-${Date.now()}`,
                     }
                 ],
             };

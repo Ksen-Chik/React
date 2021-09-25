@@ -24,3 +24,11 @@ export const deleteMessage = (chatId, id) => ({
     id,
   },
 });
+
+export const putMessageToStoreWithThunk = (chatId, message) => (dispatch, getState) => {
+  dispatch(addMessage(chatId, message));
+  if (message.author !== "Robot") {
+    const botMessage = { author: "Robot", text: "ваш звонок очень важен для вас" };
+    setTimeout(() => dispatch(addMessage(chatId, botMessage)), 2000);
+  }
+}
