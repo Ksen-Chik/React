@@ -39,13 +39,13 @@ export const getAnimalAsync = (index) => async (dispatch, getState) => {
 
     animal = {}
     try {
+        // Вопрос: Тут происходит какой-то баг, в функцию заходит лишь один раз, но из await возвращается два раза. Как такое может быть?
         const response = await fetch(apiUrl);
 
         if (!response.ok) {
             throw new Error(`${response.status}`);
         }
 
-        // Вопрос: Тут происходит какой-то баг, в функцию заходит лишь один раз, но из await возвращается два раза. Как такое может быть?
         const result = await response.json();
         animal.url = result.file ?? result.url ?? result.image;
         animal.state = STATE_OK;
