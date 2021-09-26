@@ -22,7 +22,7 @@ export const Routes = () => {
                 </li>
 
                 <li>
-                    <Link to="/animal">Animals</Link>
+                    <Link to="/animals">Animals</Link>
                 </li>
             </ul>
 
